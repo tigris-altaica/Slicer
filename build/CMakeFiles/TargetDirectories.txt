@@ -1,0 +1,5 @@
+/home/kali/VSCodeProjects/Slicer/build/CMakeFiles/Slicer.dir
+/home/kali/VSCodeProjects/Slicer/build/CMakeFiles/package.dir
+/home/kali/VSCodeProjects/Slicer/build/CMakeFiles/package_source.dir
+/home/kali/VSCodeProjects/Slicer/build/CMakeFiles/edit_cache.dir
+/home/kali/VSCodeProjects/Slicer/build/CMakeFiles/rebuild_cache.dir
