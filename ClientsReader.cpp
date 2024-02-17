@@ -5,13 +5,12 @@
 #include "ClientsReader.h"
 
 
-ClientsReader::ClientsReader(const std::string& fn) : fileName(fn) { }
+ClientsReader::ClientsReader(const std::string& fn) : filename(fn) { }
 
-void ClientsReader::read() {
-    std::ifstream ifs(fileName);
-
+void ClientsReader::read(UDPClient& udpc) {
+    std::ifstream ifs(filename);
     if (!ifs.is_open()) {
-        std::cout << "Failed to open " << fileName << std::endl;
+        std::cout << "Failed to open " << filename << std::endl;
         return;
     }
 
@@ -32,11 +31,15 @@ void ClientsReader::read() {
             continue;
         }
 
-        clientAddr.sin_port = htons((ushort)8000);
+        clientAddr.sin_port = htons((ushort)8888);
 
-        if (!clients.contains(ip)) {
-            clients.insert(ip);
-            //udpc.addClient(clientAddr);
+        if (!clients.contains(clientAddr.sin_addr.s_addr)) {
+            clients.insert(clientAddr.sin_addr.s_addr);
+
+            int sock = udpc.addClient(clientAddr);
+            if (sock != -1) {
+                udpc.sendData(sock);
+            }
         }
     }
 }

@@ -5,18 +5,16 @@
 #include "ArgsParser.h"
 
 
-ArgsParser::ArgsParser(int argc, const char **argv) : argc(argc), argv(argv) {
-
-}
+ArgsParser::ArgsParser(int argc, const char **argv) : argc(argc), argv(argv) { }
 
 int ArgsParser::parse() {
     if (argc < 5) {
-        std::cout << "Too few arguments: " << argc << std::endl;
+        std::cout << "Too few arguments: " << argc - 1 << std::endl;
         return -1;
     }
 
     if (argc > 5) {
-        std::cout << "Too many arguments: " << argc << std::endl;
+        std::cout << "Too many arguments: " << argc - 1 << std::endl;
         return -1;
     }
 

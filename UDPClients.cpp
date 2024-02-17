@@ -1,11 +1,12 @@
 #include <unistd.h>
 #include <iostream>
+#include <cstring>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "UDPClient.h"
+#include "UDPClients.h"
 
-UDPClient::UDPClient(size_t bandwidth, sockaddr_in serverAddr)
+UDPClients::UDPClients(size_t bandwidth, sockaddr_in serverAddr)
     : bandwidth(bandwidth),
       serverAddr(serverAddr),
       dataBuffer(bandwidth, 'A')
@@ -17,7 +18,7 @@ UDPClient::UDPClient(size_t bandwidth, sockaddr_in serverAddr)
     }
 }
 
-int UDPClient::addClient(sockaddr_in clientAddr) {
+int UDPClients::addClient(sockaddr_in clientAddr) {
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         std::cout << "Failed to create client socket" << std::endl;
@@ -37,17 +38,17 @@ int UDPClient::addClient(sockaddr_in clientAddr) {
 
     int ctlRes = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sock, &event);
     if (ctlRes < 0) {
-        std::cout << "Failed to add client socket to epoll, error " << errno << std::endl;
+        std::cout << "Failed to add client socket to epoll, error " << std::strerror(errno) << std::endl;
         return -1;
     }
 
     return sock;
 }
 
-void UDPClient::receiveData() {
+void UDPClients::receiveData() {
     int numReady = epoll_wait(epoll_fd, events, maxClients, 100);
     if (numReady < 0) {
-        std::cout << "Failed to wait for events on epoll instance, error " << errno << std::endl;
+        std::cout << "Failed to wait for events on epoll instance, error " << std::strerror(errno) << std::endl;
         return;
     }
 
@@ -67,7 +68,7 @@ void UDPClient::receiveData() {
     }
 }
 
-void UDPClient::sendData(int clientSocket) {
+void UDPClients::sendData(int clientSocket) {
     int sendRes = sendto(clientSocket, dataBuffer.data(), bandwidth, MSG_NOSIGNAL, (sockaddr *)&serverAddr, sizeof(sockaddr_in));
     if (sendRes < 0) {
         std::cout << "Failed to send data to server" << std::endl;
@@ -75,6 +76,6 @@ void UDPClient::sendData(int clientSocket) {
     }
 }
 
-UDPClient::~UDPClient() {
+UDPClients::~UDPClients() {
     close(epoll_fd);
 }

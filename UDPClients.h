@@ -3,9 +3,9 @@
 #include <vector>
 #include <sys/epoll.h>
 
-class UDPClient {
+class UDPClients {
 public:
-    UDPClient(size_t bandwidth, sockaddr_in serverAddr);
+    UDPClients(size_t bandwidth, sockaddr_in serverAddr);
 
     int addClient(sockaddr_in clientAddr);
 
@@ -13,7 +13,7 @@ public:
 
     void sendData(int clientSocket);
 
-    ~UDPClient();
+    ~UDPClients();
 
 private:
     static const size_t maxClients = 10000;
