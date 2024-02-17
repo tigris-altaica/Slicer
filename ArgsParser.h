@@ -1,24 +1,15 @@
 #include <netinet/in.h>
 
 
-class ArgsParser
-{
+class ArgsParser {
+    using Args = std::tuple<std::string, ssize_t, sockaddr_in>;
+
 public:
     ArgsParser(int argc, const char **argv);
 
-    int parse();
-
-    std::string getClientsIPfile() const;
-
-    size_t getBandwidth() const;
-
-    sockaddr_in getEchoServer() const;
+    Args parse() const;
 
 private:
     int argc;
     const char **argv;
-
-    std::string clientsIPfile;
-    size_t bandwidth;
-    sockaddr_in echoServerAddr;
 };

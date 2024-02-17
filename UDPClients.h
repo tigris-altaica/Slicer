@@ -1,25 +1,36 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <sys/epoll.h>
+
 
 class UDPClients {
 public:
     UDPClients(size_t bandwidth, sockaddr_in serverAddr);
 
-    int addClient(sockaddr_in clientAddr);
+    void addClient(sockaddr_in clientAddr);
 
-    void receiveData();
+    bool hasClient(const in_addr_t clientAddr) const;
 
-    void sendData(int clientSocket);
+    void sendData() const;
+
+    void waitAndRecieveData() const;
 
     ~UDPClients();
 
 private:
-    static const size_t maxClients = 10000;
-    const size_t bandwidth;
+    void receiveDataOnSocket(int clientSocket) const;
+
+    void sendDataOnSocket(int clientSocket) const;
+
+    
+    std::unordered_map<in_addr_t, int> clientSockets;
     const sockaddr_in serverAddr;
-    const std::vector<char> dataBuffer;
-    int epoll_fd;
-    epoll_event events[maxClients];
+    int epollFd;
+
+    static const size_t writeBufferSize = 8192;
+    std::array<char, writeBufferSize> writeBuffer;
+
+    size_t bytesPerSecond;
 };

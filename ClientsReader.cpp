@@ -1,13 +1,14 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "ClientsReader.h"
 
 
-ClientsReader::ClientsReader(const std::string& fn) : filename(fn) { }
+ClientsReader::ClientsReader(const std::string& filename) : filename(filename) { }
 
-void ClientsReader::read(UDPClient& udpc) {
+void ClientsReader::read(UDPClients& udpClients) const {
     std::ifstream ifs(filename);
     if (!ifs.is_open()) {
         std::cout << "Failed to open " << filename << std::endl;
@@ -21,9 +22,7 @@ void ClientsReader::read(UDPClient& udpc) {
         lineCounter++;
 
         sockaddr_in clientAddr;
-
         memset(&clientAddr, 0, sizeof(clientAddr));  
-	    clientAddr.sin_family = AF_INET;  
 
         int ret = inet_aton(ip.c_str(), &clientAddr.sin_addr);
         if (ret == 0) {
@@ -31,15 +30,13 @@ void ClientsReader::read(UDPClient& udpc) {
             continue;
         }
 
-        clientAddr.sin_port = htons((ushort)8888);
-
-        if (!clients.contains(clientAddr.sin_addr.s_addr)) {
-            clients.insert(clientAddr.sin_addr.s_addr);
-
-            int sock = udpc.addClient(clientAddr);
-            if (sock != -1) {
-                udpc.sendData(sock);
-            }
+        if (udpClients.hasClient(clientAddr.sin_addr.s_addr)) {
+            continue;
         }
+
+	    clientAddr.sin_family = AF_INET;  
+        clientAddr.sin_port = htons((uint16_t)8888);
+
+        udpClients.addClient(clientAddr);
     }
 }

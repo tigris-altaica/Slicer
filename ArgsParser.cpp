@@ -1,3 +1,4 @@
+#include <tuple>
 #include <iostream>
 #include <string.h>
 #include <arpa/inet.h>
@@ -7,22 +8,30 @@
 
 ArgsParser::ArgsParser(int argc, const char **argv) : argc(argc), argv(argv) { }
 
-int ArgsParser::parse() {
+ArgsParser::Args ArgsParser::parse() const {
     if (argc < 5) {
         std::cout << "Too few arguments: " << argc - 1 << std::endl;
-        return -1;
+        exit(-1);
     }
 
     if (argc > 5) {
         std::cout << "Too many arguments: " << argc - 1 << std::endl;
-        return -1;
+        exit(-1);
     }
+
+    std::string clientsIPfile;
+    ssize_t bandwidth;
+    sockaddr_in echoServerAddr;
 
 
     clientsIPfile = argv[1];
 
 
     bandwidth = atol(argv[2]);
+    if (bandwidth <= 0) {
+        std::cout << "Invalid bandwidth: " << argv[2] << std::endl;
+        exit(-1);
+    }
 
 
     memset(&echoServerAddr, 0, sizeof(echoServerAddr));  
@@ -30,29 +39,18 @@ int ArgsParser::parse() {
 
     int ret = inet_aton(argv[3], &echoServerAddr.sin_addr);
     if (ret == 0) {
-        std::cout << "Invalid echo server address: " << std::string(argv[3]) << std::endl;
-        return -1;
+        std::cout << "Invalid echo server address: " << argv[3] << std::endl;
+        exit(-1);
     }
 
 
     int echoServerPort = atoi(argv[4]);
     if (!(echoServerPort >= 0 && echoServerPort <= 65535)) {
-        std::cout << "Invalid echo server port: " << echoServerPort << std::endl;
-        return -1;
+        std::cout << "Invalid echo server port: " << argv[4] << std::endl;
+        exit(-1);
     }
-	echoServerAddr.sin_port = htons((ushort)echoServerPort);  
+	echoServerAddr.sin_port = htons((uint16_t)echoServerPort);  
+    
 
-    return 0;
-}
-
-std::string ArgsParser::getClientsIPfile() const {
-    return clientsIPfile;
-}
-
-size_t ArgsParser::getBandwidth() const {
-    return bandwidth;
-}
-
-sockaddr_in ArgsParser::getEchoServer() const {
-    return echoServerAddr;
+    return std::make_tuple(clientsIPfile, bandwidth, echoServerAddr);
 }

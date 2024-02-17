@@ -1,17 +1,14 @@
 #include <string>
-#include <unordered_set>
-#include <arpa/inet.h>
 
-#include "UDPClient.h"
+#include "UDPClients.h"
 
 
 class ClientsReader {
 public:
-    ClientsReader(const std::string& fn);
+    ClientsReader(const std::string& filename);
 
-    void read(UDPClient& ClientsReader);
+    void read(UDPClients& ClientsReader) const;
 
 private:
     const std::string filename;
-    std::unordered_set<in_addr_t> clients;
 };          

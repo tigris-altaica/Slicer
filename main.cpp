@@ -4,24 +4,30 @@
 
 #include "ArgsParser.h"
 #include "ClientsReader.h"
-#include "UDPClient.h"
+#include "UDPClients.h"
 
 
 int main(int argc, const char** argv) {
-    ArgsParser ap(argc, argv);
-    if (ap.parse() != 0) {
-        return -1;
-    }
+    ArgsParser argsParser(argc, argv);
+    auto [clientsIPfile, bandwidth, echoServerAddr] = argsParser.parse();
 
-    ClientsReader cr(ap.getClientsIPfile());
-    UDPClient udpc(ap.getBandwidth(), ap.getEchoServer());
+    ClientsReader clientsReader(clientsIPfile);
+
+    UDPClients udpClients(bandwidth, echoServerAddr);
+    
+
+    auto periodEnd = std::chrono::system_clock::now();
 
     while (true) {
-        cr.read(udpc);
+        periodEnd += std::chrono::seconds(1);
 
-        udpc.receiveData();
+        clientsReader.read(udpClients);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        udpClients.sendData();
+
+        udpClients.waitAndRecieveData();
+
+        std::this_thread::sleep_until(periodEnd);
     }
 
     return 0;
